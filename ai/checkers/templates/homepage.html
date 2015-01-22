@@ -1,4 +1,86 @@
 {% extends 'base.html' %}
 {% block main %}
-Works fine
+<h1>Checkers</h1>
+<table id="board" cellspacing="0">
+    <tr>
+    	<td class="pawn white"></td>
+    	<td class="pawn white"></td>
+    	<td class="pawn white"></td>
+    	<td class="pawn white"></td>
+    	<td class="pawn white"></td>
+    	<td class="pawn white"></td>
+    	<td class="pawn white"></td>
+    	<td class="pawn white"></td>
+    </tr>
+    <tr>
+    	<td class="pawn white"></td>
+    	<td class="pawn white"></td>
+    	<td class="pawn white"></td>
+    	<td class="pawn white"></td>
+    	<td class="pawn white"></td>
+    	<td class="pawn white"></td>
+    	<td class="pawn white"></td>
+    	<td class="pawn white"></td>
+    </tr>
+    <tr>
+    	<td></td>
+    	<td></td>
+    	<td></td>
+    	<td></td>
+    	<td></td>
+    	<td></td>
+    	<td></td>
+    	<td></td>
+    </tr>
+    <tr>
+    	<td></td>
+    	<td></td>
+    	<td></td>
+    	<td></td>
+    	<td></td>
+    	<td></td>
+    	<td></td>
+    	<td></td>
+    </tr>
+    <tr>
+    	<td></td>
+    	<td></td>
+    	<td></td>
+    	<td></td>
+    	<td></td>
+    	<td></td>
+    	<td></td>
+    	<td></td>
+    </tr>
+    <tr>
+    	<td></td>
+    	<td></td>
+    	<td></td>
+    	<td></td>
+    	<td></td>
+    	<td></td>
+    	<td></td>
+    	<td></td>
+    </tr>
+    <tr>
+        <td class="pawn black"></td>
+        <td class="pawn black"></td>
+        <td class="pawn black"></td>
+        <td class="pawn black"></td>
+        <td class="pawn black"></td>
+        <td class="pawn black"></td>
+        <td class="pawn black"></td>
+        <td class="pawn black"></td>
+    </tr>
+    <tr>
+        <td class="pawn black"></td>
+        <td class="pawn black"></td>
+        <td class="pawn black"></td>
+        <td class="pawn black"></td>
+        <td class="pawn black"></td>
+        <td class="pawn black"></td>
+    	<td class="pawn black"></td>
+    	<td class="pawn black"></td>
+    </tr>
+</table>
 {% endblock %}
