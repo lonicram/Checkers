@@ -1,7 +1,20 @@
+h1{
+	width:400px;
+	margin:0 auto;
+	text-align:center;
+}
+#board{
+	margin: 0 auto;
+}
 #board td{
 	width:40px;
 	height:40px;
 	border:1px solid;
+	cursor:pointer;
+}
+#board .pawn.active{
+	border-color:red;
+	opacity:0.8;
 }
 #board tr:nth-child(2n + 1) td:nth-child(2n){
     background-color:#000;
