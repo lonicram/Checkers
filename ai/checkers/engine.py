@@ -40,9 +40,11 @@ class Engine:
                 if row > -1 and col > -1:
                     # test if field is empty
                     if value is None:
-                        available_moves_empty.append([row, col])
+                        available_moves.append([row, col])
                     # test if field next to pawn which we will take is empty
                     elif value == self.signs[not self.active_turn]:
+                        print 'checking beating'
+                        print self.active_turn
                         if self.active_turn == False:
                             b_row = row + vector[0]
                         else:
@@ -51,10 +53,10 @@ class Engine:
                         b_col = col + vector[1]
                         field_after_jump = self.state[b_row][b_col]
                         if field_after_jump is None:
-                            available_moves_empty.append([b_row, b_col])
+                            available_moves.append([b_row, b_col])
 
             except (KeyError, IndexError):
                 # TODO:add something
                 pass
 
-        return available_moves_empty
+        return available_moves

@@ -12,8 +12,12 @@ h1{
 	border:1px solid;
 	cursor:pointer;
 }
-#board .pawn.active{
-	border-color:red;
+#board td.active{
+	border-color:white;
+	opacity:0.8;
+}
+#board td.pos_move{
+	border-color:green;
 	opacity:0.8;
 }
 #board tr:nth-child(2n + 1) td:nth-child(2n){

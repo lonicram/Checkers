@@ -77,15 +77,19 @@ var checkers = (function(){
     
     var show_av_moves = function(pawn){
         self.turn = ($(pawn).hasClass('white')) ? 'white' : 'black';
+        self.board.find('.active').removeClass('active');
+        self.board.find('.pos_move').removeClass('pos_move');
         pawn.addClass('active');
         var row = pawn.parents('tr').index();
         var col = pawn.index();
         var handlers = {
                 success:function(data){
-                    
+                    var tr = self.board.find('tr');
                     for(var move in data){
-                        
-                        console.log(data[move]);
+                        var move = data[move];
+                        console.log(move);
+                        var td = $(tr[move[0]]).find('td');
+                        $(td[move[1]]).addClass('pos_move');
                     }
                     console.log(data)
                 },
@@ -102,11 +106,19 @@ var checkers = (function(){
         request('/get_available_moves_for_pawn/', data, handlers);
     };
     var gui = function(){
-        var pawns = $('#board .pawn');
-        pawns.on('click tap', function(){
-            pawns.removeClass('active');
+        var board = $('#board');
+        board.on('click tap', '.pawn', function(){
+            board.find('active').removeClass('active');
             show_av_moves($(this));
-            
+        })
+        .on('click', '.pos_move', function(){
+            var active = $('.pawn.active');
+            //make move
+            $(this).addClass('pawn')
+                .addClass((active.hasClass('white')? 'white' : 'black'));
+            //reset
+            active.removeClass('active pawn white black');
+            board.find('.pos_move').removeClass('pos_move');
         });
     };
     self.init = function(){
