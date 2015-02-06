@@ -35,9 +35,9 @@ var checkers = (function(){
             var td = $(value).children('td');
             td.each(function(key, obj){
                 if($(obj).hasClass('white')){
-                    row.push(false);
+                    row.push('white');
                 }else if($(obj).hasClass('black')){
-                    row.push(true);
+                    row.push('black');
                 }else{
                     row.push(null);
                 }
@@ -76,12 +76,17 @@ var checkers = (function(){
     };
     
     var show_av_moves = function(pawn){
-        self.turn = ($(this).hasClass('white')) ? 'white' : 'black';
+        self.turn = ($(pawn).hasClass('white')) ? 'white' : 'black';
         pawn.addClass('active');
         var row = pawn.parents('tr').index();
         var col = pawn.index();
         var handlers = {
                 success:function(data){
+                    
+                    for(var move in data){
+                        
+                        console.log(data[move]);
+                    }
                     console.log(data)
                 },
                 error: function(data){
@@ -91,10 +96,8 @@ var checkers = (function(){
         
         var data = {
                 'state': get_state(), 
-                'pawn_cords': {
-                    x: row, 
-                    y: col
-                }
+                'pawn_cords': [row, col], 
+                'turn': self.turn
         }
         request('/get_available_moves_for_pawn/', data, handlers);
     };
