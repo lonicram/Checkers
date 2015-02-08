@@ -45,16 +45,16 @@ def update_board(request):
 
     return HttpResponse(json.dumps(new_board_state))
 
-def make_move(request):
+def get_ai_move(request):
     '''
     Function will get from POST json representation of 
     chess board. 
     
     Make few steps:
-    Valid if last user move is correct.
-    If not valid:
-        return info
     TODO: also check if user didn't modify DOM / hacks
-    Call minmax algorithm and return computer move.
+    Call minmax algorithm and return ai move.
     
     '''
+    data = json.loads(request.POST.get('data', False))
+    eng = initialize_engine(data)
+    return HttpResponse(json.dumps(eng.get_possible_moves()))

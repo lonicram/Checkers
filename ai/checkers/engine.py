@@ -90,7 +90,7 @@ class Engine:
                     start_coord[0] - 1 ,
                     start_coord[1] + 1 
                 ]
-            print removed_pawn
+
             feature_state[removed_pawn[0]][removed_pawn[1]] = 'beaten' 
         else:
             sign = self.signs[self.active_turn]
@@ -115,11 +115,23 @@ class Engine:
         return 0
 
 
-    def get_possible_moves(self, state):
-        pass
+    def get_possible_moves(self, state='', turn=''):
+        '''
+        Funcion returns these pawns which can make a move
+        '''
+        pawns=[]
+        state = self.state if state == '' else state
+        turn = self.active_turn if turn == '' else turn
+        for row_key, row in enumerate(state):
+            for col_key, field in enumerate(row):
+                if field == self.signs[turn]:
+                    coords = [row_key, col_key]
+                    if self.get_available_moves_for_pawn(coords) != []:
+                        data.append(coords)
 
+        return pawns
 
-    def make_move(self, board, active_turn=''):
+    def get_ai_move(self, board, active_turn=''):
         '''
         minmax algorithm in very simple version
         '''
@@ -137,7 +149,7 @@ class Engine:
         for move in possible_moves:
             new_board = list(board)
             new_board[move] = self.signs[active_turn]
-            scores[move] = self.make_move(new_board, not active_turn)
+            scores[move] = self.get_ai_move(new_board, not active_turn)
 
         if self.player == active_turn:
             move = max(scores, key=scores.get)

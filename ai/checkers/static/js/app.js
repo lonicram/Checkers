@@ -77,8 +77,22 @@ var checkers = (function(){
         });
     };
     
-    var make_move = function(){
-        
+    var get_ai_move = function(){
+        var handlers = {
+            success: function(data){
+                console.log(data);
+            }, 
+            error: function(data) {
+                console.log(data);
+            }
+        };
+
+        var data = {
+            'state' : get_state(), 
+            'turn': 'pawn_white'
+        }
+
+        request('/get_ai_move/', data, handlers);
     };
     
     var update_board = function(start_coord, end_coord, turn) {
@@ -95,12 +109,13 @@ var checkers = (function(){
                         var td = $(tr.find('td')[col]);
                         if (sign == 'beaten'){
                             td.addClass(sign);
-                            setTimeout(function(){
-                                td.removeClass('pawn_white pawn_black beaten');
-                            },2000);
                         }
                     })
                 });
+                setTimeout(function(){
+                    $('.beaten').removeClass('pawn_white pawn_black beaten');
+                        get_ai_move();
+                    },1000);
             }, 
             error: function(data) {
                 console.log(data);
