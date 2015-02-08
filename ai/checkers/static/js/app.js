@@ -1,5 +1,7 @@
 $.ajaxSetup({ 
      beforeSend: function(xhr, settings) {
+        $('.disable').show();
+        $('#status').text('computing');
          function getCookie(name) {
              var cookieValue = null;
              if (document.cookie && document.cookie != '') {
@@ -19,6 +21,10 @@ $.ajaxSetup({
              // Only send the token to relative URLs i.e. locally.
              xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
          }
+     }, 
+     complete: function(){
+        $('.disable').hide();
+        $('#status').text('');
      } 
 });
 var checkers = (function(){
@@ -34,10 +40,10 @@ var checkers = (function(){
             var row = []; 
             var td = $(value).children('td');
             td.each(function(key, obj){
-                if($(obj).hasClass('white')){
-                    row.push('white');
-                }else if($(obj).hasClass('black')){
-                    row.push('black');
+                if($(obj).hasClass('pawn_white')){
+                    row.push('pawn_white');
+                }else if($(obj).hasClass('pawn_black')){
+                    row.push('pawn_black');
                 }else{
                     row.push(null);
                 }
@@ -75,8 +81,44 @@ var checkers = (function(){
         
     };
     
+    var update_board = function(start_coord, end_coord, turn) {
+        var handlers = {
+            success: function(data){
+                console.log(data);
+
+                $(data).each(function (key, value) {
+                    var row = key;
+                    $(value).each(function(key, value){
+                        var col = key;
+                        var sign = data[row][col];
+                        var tr = $(self.board.find('tr')[row])
+                        var td = $(tr.find('td')[col]);
+                        if (sign == 'beaten'){
+                            td.addClass(sign);
+                            setTimeout(function(){
+                                td.removeClass('pawn_white pawn_black beaten');
+                            },2000);
+                        }
+                    })
+                });
+            }, 
+            error: function(data) {
+                console.log(data);
+            }
+        };
+
+        var data = {
+            'state' : get_state(), 
+            'turn': turn, 
+            'start_coord' : start_coord,
+            'end_coord' : end_coord
+        }
+
+        request('/update_board/', data, handlers);
+    }
+
     var show_av_moves = function(pawn){
-        self.turn = ($(pawn).hasClass('white')) ? 'white' : 'black';
+        self.turn = ($(pawn).hasClass('pawn_white')) ? 'pawn_white' : 'pawn_black';
         self.board.find('.active').removeClass('active');
         self.board.find('.pos_move').removeClass('pos_move');
         pawn.addClass('active');
@@ -87,11 +129,9 @@ var checkers = (function(){
                     var tr = self.board.find('tr');
                     for(var move in data){
                         var move = data[move];
-                        console.log(move);
                         var td = $(tr[move[0]]).find('td');
                         $(td[move[1]]).addClass('pos_move');
                     }
-                    console.log(data)
                 },
                 error: function(data){
                     console.log(data);
@@ -107,17 +147,29 @@ var checkers = (function(){
     };
     var gui = function(){
         var board = $('#board');
-        board.on('click tap', '.pawn', function(){
+        board.on('click tap', '.pawn_white, .pawn_black ', function(){
             board.find('active').removeClass('active');
             show_av_moves($(this));
         })
         .on('click', '.pos_move', function(){
-            var active = $('.pawn.active');
+            var active = $('.active');
+            var turn = '';
             //make move
-            $(this).addClass('pawn')
-                .addClass((active.hasClass('white')? 'white' : 'black'));
+            turn = (active.hasClass('pawn_white')? 'pawn_white' : 'pawn_black')
+            $(this).addClass(turn);
+
+            //TODO: make function for getting coords
+            var start_coord = [];
+            var end_coord = [];
+            start_coord[0] = $('.active').parents('tr').index();
+            start_coord[1] = $('.active').index();
+            end_coord[0] = $(this).parents('tr').index();
+            end_coord[1] = $(this).index();
+
+            update_board(start_coord, end_coord, turn);
+
             //reset
-            active.removeClass('active pawn white black');
+            active.removeClass('active pawn_white pawn_black');
             board.find('.pos_move').removeClass('pos_move');
         });
     };

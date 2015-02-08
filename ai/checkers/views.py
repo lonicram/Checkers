@@ -10,20 +10,40 @@ def homepage(request):
     return render_to_response('homepage.html', RequestContext(request))
 
 
-def get_available_moves_for_pawn(request):
-    data = json.loads(request.POST.get('data', False))
+def initialize_engine(data):
+    '''
+    Initialize game engine
+    @param request - Request
+    '''
     # assuming that program displays av moves only for player
-    if data['turn'] == 'white':
+    if data['turn'] == 'pawn_white':
         turn = True
-    elif data['turn'] == 'black':
+    elif data['turn'] == 'pawn_black':
         turn = False
     else:
         return HttpResponse('Wrong data passed')
 
-    eng = Engine(data['state'], turn)
+    return  Engine(data['state'], turn)
+
+
+def get_available_moves_for_pawn(request):
+    data = json.loads(request.POST.get('data', False))
+    eng = initialize_engine(data)
     available_moves = eng.get_available_moves_for_pawn(data['pawn_cords'])
 
     return HttpResponse(json.dumps(available_moves));
+
+def update_board(request):
+    '''
+    In example, remove pawn which has been beaten
+    '''
+    data = json.loads(request.POST.get('data', False))
+    eng = initialize_engine(data)
+    new_board_state = eng.update_board(
+        data['start_coord'], data['end_coord']
+        )
+
+    return HttpResponse(json.dumps(new_board_state))
 
 def make_move(request):
     '''
