@@ -81,6 +81,7 @@ var checkers = (function(){
         var handlers = {
             success: function(data){
                 console.log(data);
+                update_board(data[0], data[1], 'pawn_white');
             }, 
             error: function(data) {
                 console.log(data);
@@ -107,14 +108,21 @@ var checkers = (function(){
                         var sign = data[row][col];
                         var tr = $(self.board.find('tr')[row])
                         var td = $(tr.find('td')[col]);
+                        
                         if (sign == 'beaten'){
                             td.addClass(sign);
+                        }else{
+                            td.removeClass('pawn_white pawn_black')
+                                .addClass(sign);
                         }
                     })
                 });
                 setTimeout(function(){
                     $('.beaten').removeClass('pawn_white pawn_black beaten');
-                        get_ai_move();
+                        if (turn != 'pawn_white'){
+                            get_ai_move();
+                        }
+                        
                     },1000);
             }, 
             error: function(data) {

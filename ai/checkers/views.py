@@ -57,4 +57,5 @@ def get_ai_move(request):
     '''
     data = json.loads(request.POST.get('data', False))
     eng = initialize_engine(data)
-    return HttpResponse(json.dumps(eng.get_possible_moves()))
+    eng.get_ai_move()
+    return HttpResponse(json.dumps(eng.next_move))

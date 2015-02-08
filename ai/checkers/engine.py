@@ -9,8 +9,8 @@ class Engine:
             False : 'pawn_black'
         }
 
-    def get_available_moves_for_pawn(self, pawn_cords):
-
+    def get_available_moves_for_pawn(self, pawn_cords, turn = ''):
+        turn = self.active_turn if turn == '' else turn
         available_moves = []
         available_moves_empty = []
         available_moves_beating = []
@@ -28,7 +28,7 @@ class Engine:
 
         for vector in expect_that_empty + expect_that_beating_backward:
             # black always at the bottom - assumption
-            if self.active_turn == False:
+            if turn == False:
                 row = pawn_cords[0] + vector[0]
             else:
                 row = pawn_cords[0] - vector[0]
@@ -61,7 +61,8 @@ class Engine:
         return available_moves
 
 
-    def update_board(self, start_coord, end_coord):
+    def update_board(self, start_coord, end_coord, turn =''):
+        turn = self.active_turn if turn == '' else turn
         feature_state = list(self.state)
         #check if player has made a beating
         row_diff = end_coord[0] - start_coord[0] 
@@ -92,9 +93,10 @@ class Engine:
                 ]
 
             feature_state[removed_pawn[0]][removed_pawn[1]] = 'beaten' 
-        else:
-            sign = self.signs[self.active_turn]
-            feature_state[end_coord[0]][end_coord[1]] = sign
+        
+        sign = self.signs[turn]
+        feature_state[start_coord[0]][start_coord[1]] = None
+        feature_state[end_coord[0]][end_coord[1]] = sign
 
         return feature_state
 
@@ -104,56 +106,70 @@ class Engine:
 
 
     def check_game_result(self, state):
-        print state
-        if self.won(state, self.player) :
-            print 'won ai'
-            return 1
-        if self.won(state, not self.player) :
-            print 'won player'
+        white = 0
+        black = 0
+        for row in state:
+            for field in row:
+                if field == self.signs[self.active_turn]:
+                    white += 1
+                elif field == self.signs[not self.active_turn]:
+                    black += 1
+
+        if white == 0:
             return -1
-        print 'draw'
+        if black == 0:
+            return 1
+
         return 0
 
 
     def get_possible_moves(self, state='', turn=''):
         '''
-        Funcion returns these pawns which can make a move
+        Funcion returns moves:
+        [pawn cords, target coords]
         '''
-        pawns=[]
+        moves=[]
         state = self.state if state == '' else state
         turn = self.active_turn if turn == '' else turn
         for row_key, row in enumerate(state):
             for col_key, field in enumerate(row):
                 if field == self.signs[turn]:
-                    coords = [row_key, col_key]
-                    if self.get_available_moves_for_pawn(coords) != []:
-                        data.append(coords)
+                    pawn = [row_key, col_key]
+                    moves_for_pawn = self.get_available_moves_for_pawn(pawn)
+                    if moves_for_pawn != []:
+                        for move in moves_for_pawn:
+                            moves.append([pawn, move]);
 
-        return pawns
+        return moves
 
-    def get_ai_move(self, board, active_turn=''):
+    def get_ai_move(self, board=[], active_turn='', depth = 0):
         '''
         minmax algorithm in very simple version
         '''
-
+        board = self.state if board == [] else board
+        active_turn = self.active_turn if active_turn == [] else active_turn
+        depth += 1
         game_result = self.check_game_result(board)
+
         if game_result != 0:
             return game_result
+        #
         possible_moves = self.get_possible_moves(board)
         if not possible_moves:
             return game_result
-
-        if active_turn == '':
-            active_turn = self.player
+        #
         scores = {}
-        for move in possible_moves:
+        print possible_moves
+        for key, move in enumerate(possible_moves):
             new_board = list(board)
-            new_board[move] = self.signs[active_turn]
-            scores[move] = self.get_ai_move(new_board, not active_turn)
+            new_board = self.update_board(move[0], move[1], active_turn)
+            scores[key] = self.get_ai_move(new_board, not active_turn, depth)
 
-        if self.player == active_turn:
+        if self.active_turn != active_turn:
             move = max(scores, key=scores.get)
-            self.next_move = move
+            print 'nextmove'
+            print move
+            self.next_move = possible_moves[move]
         else:
             move = min(scores, key=scores.get)
 
