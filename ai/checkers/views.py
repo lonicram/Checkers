@@ -5,6 +5,7 @@ from django.http.response import HttpResponse
 from django.template.context import RequestContext
 from engine import Engine
 
+
 def homepage(request):
 
     return render_to_response('homepage.html', RequestContext(request))
@@ -23,7 +24,7 @@ def initialize_engine(data):
     else:
         return HttpResponse('Wrong data passed')
 
-    return  Engine(data['state'], turn)
+    return Engine(data['state'], turn)
 
 
 def get_available_moves_for_pawn(request):
@@ -31,7 +32,7 @@ def get_available_moves_for_pawn(request):
     eng = initialize_engine(data)
     available_moves = eng.get_available_moves_for_pawn(data['pawn_cords'])
 
-    return HttpResponse(json.dumps(available_moves));
+    return HttpResponse(json.dumps(available_moves))
 
 def update_board(request):
     '''
@@ -47,15 +48,15 @@ def update_board(request):
 
 def get_ai_move(request):
     '''
-    Function will get from POST json representation of 
-    chess board. 
-    
+    Function will get from POST json representation of
+    chess board.
+
     Make few steps:
     TODO: also check if user didn't modify DOM / hacks
     Call minmax algorithm and return ai move.
-    
+
     '''
     data = json.loads(request.POST.get('data', False))
     eng = initialize_engine(data)
-    eng.get_ai_move()
+    eng.get_ai_move(data['state'])
     return HttpResponse(json.dumps(eng.next_move))
