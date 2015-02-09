@@ -103,10 +103,9 @@ class Engine:
         feature_state[start_coord[0]][start_coord[1]] = None
         feature_state[end_coord[0]][end_coord[1]] = sign
 
-        print feature_state
         return list(feature_state)
 
-    def check_game_result(self, state):
+    def check_game_result(self, state, get_white_number=False):
         white = 0
         black = 0
         for row in state:
@@ -115,13 +114,14 @@ class Engine:
                     white += 1
                 elif field == 'pawn_black':
                     black += 1
-        print white
-        print black
-        if black == 0:
-            return 1
-        if white == 0:
-            return -1
 
+        if black == 0:
+            return 100
+        if white == 0:
+            return -100
+
+        if get_white_number:
+            return white
         return 0
 
     def get_possible_moves(self, state='', turn=''):
@@ -157,16 +157,14 @@ class Engine:
 
         possible_moves = self.get_possible_moves(board, active_turn)
         if not possible_moves:
-            print 'brak ruchu %s' % str(active_turn)
             return game_result
 
         # print possible_moves
-        # if depth == 1:
-            # return game_result
-        # depth += 1
+        if depth == 5:
+            return self.check_game_result(board, True)
+        depth += 1
         scores = {}
         for key, move in enumerate(possible_moves):
-            print move
             new_board = self.update_board(move[0], move[1], board, active_turn)
             c_board = copy.deepcopy(new_board)
             scores[key] = self.get_ai_move(c_board, not active_turn, depth)
@@ -177,5 +175,4 @@ class Engine:
         else:
             move = min(scores, key=scores.get)
 
-        print scores
         return scores[move]
