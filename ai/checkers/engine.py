@@ -175,7 +175,7 @@ class Engine:
             return game_result
 
         # print possible_moves
-        if depth == 4:
+        if depth == 5:
             return self.check_game_result(board, True)
         depth += 1
         scores = {}
@@ -188,9 +188,10 @@ class Engine:
                 pool = Pool(processes=4)
                 pools.append(pool.apply_async(self.get_ai_move, arguments))
 
-            for key, poll in enumerate(pools):
+            for key, pool in enumerate(pools):
                 # wait for results
-                scores[key] = poll.get()
+                scores[key] = pool.get()
+                pool.close()
         else:
 
             for key, move in enumerate(possible_moves):
