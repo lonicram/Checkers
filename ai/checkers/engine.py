@@ -1,4 +1,19 @@
 import copy
+import copy_reg
+import types
+from time import sleep
+from random import randint
+from multiprocessing import Pool
+
+
+def _pickle_method(m):
+    if m.im_self is None:
+        return getattr, (m.im_class, m.im_func.func_name)
+    else:
+        return getattr, (m.im_self, m.im_func.func_name)
+
+copy_reg.pickle(types.MethodType, _pickle_method)
+
 
 class Engine:
 
@@ -160,14 +175,29 @@ class Engine:
             return game_result
 
         # print possible_moves
-        if depth == 5:
+        if depth == 4:
             return self.check_game_result(board, True)
         depth += 1
         scores = {}
-        for key, move in enumerate(possible_moves):
-            new_board = self.update_board(move[0], move[1], board, active_turn)
-            c_board = copy.deepcopy(new_board)
-            scores[key] = self.get_ai_move(c_board, not active_turn, depth)
+        pools = []
+        if depth == 1:
+            for key, move in enumerate(possible_moves):
+                new_board = self.update_board(move[0], move[1], board, active_turn)
+                c_board = copy.deepcopy(new_board)
+                arguments = [c_board, not active_turn, depth]
+                pool = Pool(processes=4)
+                pools.append(pool.apply_async(self.get_ai_move, arguments))
+
+            for key, poll in enumerate(pools):
+                # wait for results
+                scores[key] = poll.get()
+        else:
+
+            for key, move in enumerate(possible_moves):
+                new_board = self.update_board(move[0], move[1], board, active_turn)
+                c_board = copy.deepcopy(new_board)
+                scores[key] = self.get_ai_move(c_board, not active_turn, depth)
+
 
         if self.player == active_turn:
             move = max(scores, key=scores.get)
