@@ -158,11 +158,12 @@ class Engine:
 
         return av_moves
 
-    def get_ai_move(self, board=[], active_turn='', depth=0):
+    def get_ai_move(self, board=[], alpha='', beta='', active_turn='', depth=0):
         '''
         minmax algorithm in very simple version
         '''
-
+        alpha = float("-infinity") if alpha == '' else alpha
+        beta = float("infinity") if beta == '' else beta
         if active_turn == '':
             active_turn = self.player
 
@@ -175,29 +176,55 @@ class Engine:
             return game_result
 
         # print possible_moves
-        if depth == 5:
+        if depth == 6:
             return self.check_game_result(board, True)
         depth += 1
         scores = {}
+        pools_obj = []
         pools = []
         if depth == 1:
             for key, move in enumerate(possible_moves):
                 new_board = self.update_board(move[0], move[1], board, active_turn)
                 c_board = copy.deepcopy(new_board)
-                arguments = [c_board, not active_turn, depth]
+                arguments = [c_board, alpha, beta, not active_turn, depth]
                 pool = Pool(processes=4)
                 pools.append(pool.apply_async(self.get_ai_move, arguments))
+                pools_obj.append(pool)
 
             for key, pool in enumerate(pools):
                 # wait for results
-                scores[key] = pool.get()
-                pool.close()
+                val = pool.get()
+                scores[key] = val
+                if active_turn == self.player:
+                    if alpha < val:
+                        alpha = val
+                    if alpha >= beta:
+                        self.next_move = move
+                        return alpha
+                else:
+                    if beta > val:
+                        beta = val
+                    if beta <= alpha:
+                        return beta
+                pools_obj[key].close()
         else:
 
             for key, move in enumerate(possible_moves):
                 new_board = self.update_board(move[0], move[1], board, active_turn)
                 c_board = copy.deepcopy(new_board)
-                scores[key] = self.get_ai_move(c_board, not active_turn, depth)
+                val = self.get_ai_move(c_board, alpha, beta, not active_turn, depth)
+                scores[key] = val
+                if active_turn == self.player:
+                    if alpha < val:
+                        alpha = val
+                    if alpha >= beta:
+                        self.next_move = move
+                        return alpha
+                else:
+                    if beta > val:
+                        beta = val
+                    if beta <= alpha:
+                        return beta
 
 
         if self.player == active_turn:
